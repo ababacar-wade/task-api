@@ -1,0 +1,16 @@
+<settings>
+    <servers>
+        <server>
+            <id>nexus</id>
+            <username>admin</username>
+            <password>passer</password>
+        </server>
+    </servers>
+    <mirrors>
+        <mirror>
+            <id>nexus</id>
+            <mirrorOf>nexus</mirrorOf>
+            <url>http://host.docker.internal:8081/repository/maven-releases/</url>
+        </mirror>
+    </mirrors>
+</settings>
