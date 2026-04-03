@@ -2,10 +2,10 @@ spring:
   application:
     name: task-api
   datasource:
-    url: jdbc:mysql://localhost:3306/taskdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/${MYSQL_DB:taskdb}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: ""
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,3 +13,14 @@ spring:
 
 server:
   port: 8085
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
