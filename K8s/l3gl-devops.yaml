@@ -29,36 +29,33 @@ spec:
     spec:
       containers:
         - name: task-api
-          image: cheibac/task_api
+          image: cheibac/task_api:latest
           ports:
             - containerPort: 8085
           envFrom:
             - configMapRef:
                 name: task-api-config
-          env:                                        # ← AJOUT ICI
-            - name: JAVA_OPTS                         # ← AJOUT ICI
-              value: "-Xms128m -Xmx256m -XX:+UseContainerSupport"  # ← AJOUT ICI
           resources:
             requests:
               cpu: "200m"
               memory: "250Mi"
             limits:
               cpu: "400m"
-              memory: "512Mi"                         # ← MODIFIÉ (était 500Mi)
+              memory: "500Mi"
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8085
-            initialDelaySeconds: 90                   # ← MODIFIÉ (était 30)
-            periodSeconds: 15                         # ← MODIFIÉ (était 10)
-            failureThreshold: 5                       # ← AJOUT ICI
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            failureThreshold: 5
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8085
-            initialDelaySeconds: 120                  # ← MODIFIÉ (était 60)
-            periodSeconds: 20                         # ← MODIFIÉ (était 15)
-            failureThreshold: 5                       # ← AJOUT ICI
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 5
 
 ---
 # Service ClusterIP
