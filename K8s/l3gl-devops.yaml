@@ -1,0 +1,97 @@
+# ConfigMap application
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: task-api-config
+  namespace: devops-l3gl
+data:
+  MYSQL_HOST: mysql-service
+  MYSQL_DB: taskdb
+  MYSQL_USER: taskuser
+  MYSQL_PASSWORD: taskpass
+
+---
+# Deployment Spring Boot
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-api
+  namespace: devops-l3gl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-api
+  template:
+    metadata:
+      labels:
+        app: task-api
+    spec:
+      containers:
+        - name: task-api
+          image: cheibac/task_api
+          ports:
+            - containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: task-api-config
+          env:                                        # ← AJOUT ICI
+            - name: JAVA_OPTS                         # ← AJOUT ICI
+              value: "-Xms128m -Xmx256m -XX:+UseContainerSupport"  # ← AJOUT ICI
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "250Mi"
+            limits:
+              cpu: "400m"
+              memory: "512Mi"                         # ← MODIFIÉ (était 500Mi)
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8085
+            initialDelaySeconds: 90                   # ← MODIFIÉ (était 30)
+            periodSeconds: 15                         # ← MODIFIÉ (était 10)
+            failureThreshold: 5                       # ← AJOUT ICI
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            initialDelaySeconds: 120                  # ← MODIFIÉ (était 60)
+            periodSeconds: 20                         # ← MODIFIÉ (était 15)
+            failureThreshold: 5                       # ← AJOUT ICI
+
+---
+# Service ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-api-service
+  namespace: devops-l3gl
+spec:
+  selector:
+    app: task-api
+  ports:
+    - port: 8085
+      targetPort: 8085
+  type: ClusterIP
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-api-ingress
+  namespace: devops-l3gl
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /l3gl(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: task-api-service
+                port:
+                  number: 8085
