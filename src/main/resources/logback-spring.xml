@@ -12,7 +12,8 @@
         </http>
         <format>
             <label>
-                <pattern>app=task-api</pattern>label>
+                <pattern>app=task-api</pattern>
+            </label>
             <message>
                 <pattern>%-5level [%thread] %logger{36} - %msg%n</pattern>
             </message>
