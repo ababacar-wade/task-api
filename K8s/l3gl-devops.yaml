@@ -11,7 +11,6 @@ data:
   MYSQL_PASSWORD: taskpass
 
 ---
-
 # Deployment Spring Boot
 apiVersion: apps/v1
 kind: Deployment
@@ -43,32 +42,22 @@ spec:
             limits:
               cpu: "400m"
               memory: "500Mi"
-          # Startup probe pour gérer le démarrage lent
-          startupProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8085
-            periodSeconds: 10
-            failureThreshold: 30  # 30*10s = 5 minutes max pour démarrer
-          # Readiness probe plus rapide après démarrage
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8085
-            initialDelaySeconds: 10
+            initialDelaySeconds: 120
             periodSeconds: 15
             failureThreshold: 5
-          # Liveness probe plus tardive
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8085
-            initialDelaySeconds: 300
+            initialDelaySeconds: 240
             periodSeconds: 20
             failureThreshold: 5
 
 ---
-
 # Service ClusterIP
 apiVersion: v1
 kind: Service
@@ -84,7 +73,6 @@ spec:
   type: ClusterIP
 
 ---
-
 # Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
